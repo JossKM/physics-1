@@ -13,13 +13,13 @@ See documentation here: https://www.raylib.com/, and examples here: https://www.
 const unsigned int TARGET_FPS = 50; //frames/second
 float dt = 1.0f / TARGET_FPS; //seconds/frame
 float time = 0;
-float x = 500;
-float y = 500;
-float frequency = 1;
-float amplitude = 100;
 
 float speed = 100;
 float angle = 30;
+
+Vector2 position;
+Vector2 velocity;
+Vector2 gravityAcceleration = { 0, 100 };
 
 //Changes world state
 void update()
@@ -27,8 +27,20 @@ void update()
 	dt = 1.0f / TARGET_FPS;
 	time += dt;
 
-	x = x + (-sin(time * frequency)) * frequency * amplitude * dt;
-	y = y + (cos(time * frequency)) * frequency * amplitude * dt;
+
+	if (IsKeyPressed(KEY_SPACE))
+	{
+		position = { 200, (float)GetScreenHeight() - 200 };
+		velocity = { (float)cos(angle * DEG2RAD) * speed, (float) - sin(angle * DEG2RAD) * speed};
+	}
+
+	//velocity changes position over time. 
+	// velocity = displacement/time    therefore     Displacement = velocity * time
+	position += velocity * dt;
+
+	//acceleration changes velocity over time
+	// accel = deltaV / time    therefore    deltaV = accel * time    where deltaV is a change in velocity
+	velocity += gravityAcceleration * dt;
 }
 
 //Display world state
@@ -42,16 +54,16 @@ void draw()
 	GuiSliderBar(Rectangle{ 10, 15, 1000, 20 }, "", TextFormat("%.2f", time), &time, 0, 240);
 	DrawText(TextFormat("T: %6.2f", time), GetScreenWidth() - 140, 10, 30, LIGHTGRAY);
 
+	GuiSliderBar(Rectangle{ 10, 60, 200, 20 }, "", TextFormat("Speed: %.0f", speed), &speed, -100, 1000);
+	GuiSliderBar(Rectangle{ 10, 90, 200, 20 }, "", TextFormat("Angle: %.0f", angle), &angle, -180, 180);
+	GuiSliderBar(Rectangle{ 10, 120, 200, 20 }, "", TextFormat("G: %.0f", gravityAcceleration.y), &gravityAcceleration.y, -600, 600);
 
-	GuiSliderBar(Rectangle{ 10, 100, 200, 100 }, "", TextFormat("Speed: %.0f", speed), &speed, -100, 1000);
-	GuiSliderBar(Rectangle{ 10, 200, 200, 100 }, "", TextFormat("Angle: %.0f", angle), &angle, -180, 180);
+	//Draw circle
+	DrawCircle(position.x, position.y, 15, RED);
 
-	/*DrawCircle(x, y, 70, RED);
-	DrawCircle(500 + cos(time * frequency) * amplitude, 500 + sin(time * frequency) * amplitude, 70, GREEN);*/
 
-	Vector2 startPos = {200, GetScreenHeight() - 200};
-	Vector2 velocity = {cos(angle * DEG2RAD) * speed, -sin(angle * DEG2RAD) * speed};
-
+	Vector2 startPos = { 200, GetScreenHeight() - 200 };
+	Vector2 velocity = { cos(angle * DEG2RAD) * speed, -sin(angle * DEG2RAD) * speed };
 	DrawLineEx(startPos, startPos + velocity, 3, RED);
 
 	EndDrawing();
