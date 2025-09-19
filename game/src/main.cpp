@@ -16,11 +16,28 @@ float time = 0;
 float speed = 100;
 float angle = 0;
 
+Vector2 position = { 500, 500 };
+Vector2 velocity = { 0,0 };
+Vector2 accelerationGravity = {0, 9};
+
 //Changes world state
 void update()
 {
 	dt = 1.0f / TARGET_FPS;
 	time += dt;
+
+
+	//vel = change in position / time, therefore     change in position = vel * time 
+	position = position + velocity * dt;
+
+	//accel = deltaV / time (change in velocity over time) therefore     deltaV = accel * time
+	velocity = velocity + accelerationGravity * dt;
+
+	if (IsKeyPressed(KEY_SPACE))
+	{
+		position = { 100, (float)GetScreenHeight() - 100 };
+		velocity = { speed * (float)cos(angle * DEG2RAD), -speed * (float)sin(angle * DEG2RAD) };
+	}
 }
 
 //Display world state
@@ -37,17 +54,18 @@ void draw()
 
 	GuiSliderBar(Rectangle{ 10, 80, 500, 30 }, "Angle", TextFormat("Angle: %.0f Degrees", angle), &angle, -180, 180);
 
+	GuiSliderBar(Rectangle{ 10, 120, 500, 30 }, "Gravity Y", TextFormat("Gravity Y: %.0f Px/sec^2", accelerationGravity.y), &accelerationGravity.y, -1000, 1000);
+
+
+
 	DrawText(TextFormat("T: %6.2f", time), GetScreenWidth() - 140, 10, 30, LIGHTGRAY);
 
 	Vector2 startPos = {100, GetScreenHeight() - 100};
-
 	Vector2 velocity = {speed * cos(angle * DEG2RAD), -speed * sin(angle * DEG2RAD)};
 
 	DrawLineEx(startPos, startPos + velocity, 3, RED);
 
-
-	//DrawCircle(x, y, 70, RED);
-	//DrawCircle(500 + cos(time * frequency) * amplitude, 500 + sin(time * frequency) * amplitude, 70, GREEN);
+	DrawCircle(position.x, position.y, 15, RED);
 
 	EndDrawing();
 
